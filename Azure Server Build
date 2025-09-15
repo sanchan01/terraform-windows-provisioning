@@ -7,7 +7,7 @@ This script uses the same values for the resource group, virtual network, and su
 terraform {
   required_providers {
     azurerm = {
-      source  = "hashicorp/azurerm"
+      source1  = "hashicorp/azurerm"
       version = "~> 3.0"
     }
   }

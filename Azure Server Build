@@ -1,0 +1,98 @@
+This mail has been sent from an external source. Do not reply to it, or open any links/attachments unless you are sure of the sender's identity.
+
+ 
+Yes, you can. Here is a similar Terraform (.tf) script that provisions the Azure resources described in the YAML file.
+This script uses the same values for the resource group, virtual network, and subnets to create a similar infrastructure. The main.tf file would contain the resource definitions.
+# Configure the Azure provider
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.0"
+    }
+  }
+}
+
+provider "azurerm" {
+  features {}
+}
+
+# Define variables for easy customization
+variable "resource_group_name" {
+  description = "The name of the resource group"
+  type        = string
+  default     = "Linux-2T-app-RG11"
+}
+
+variable "location" {
+  description = "The Azure region to create resources in"
+  type        = string
+  default     = "NorthEurope"
+}
+
+variable "vnet_name" {
+  description = "The name of the virtual network"
+  type        = string
+  default     = "twoTierVnet"
+}
+
+variable "vnet_cidr" {
+  description = "The CIDR block for the virtual network"
+  type        = list(string)
+  default     = ["10.1.0.0/16"]
+}
+
+variable "websubnet_name" {
+  description = "The name of the web subnet"
+  type        = string
+  default     = "websubnet"
+}
+
+variable "websubnet_cidr" {
+  description = "The CIDR block for the web subnet"
+  type        = list(string)
+  default     = ["10.1.1.0/24"]
+}
+
+variable "dbsubnet_name" {
+  description = "The name of the database subnet"
+  type        = string
+  default     = "dbsubnet"
+}
+
+variable "dbsubnet_cidr" {
+  description = "The CIDR block for the database subnet"
+  type        = list(string)
+  default     = ["10.1.2.0/24"]
+}
+
+# Create a resource group
+resource "azurerm_resource_group" "rg" {
+  name     = var.resource_group_name
+  location = var.location
+}
+
+# Create a virtual network
+resource "azurerm_virtual_network" "vnet" {
+  name                = var.vnet_name
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  address_space       = var.vnet_cidr
+}
+
+# Create the web subnet
+resource "azurerm_subnet" "websubnet" {
+  name                 = var.websubnet_name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  resource_group_name  = azurerm_resource_group.rg.name
+  address_prefixes     = var.websubnet_cidr
+}
+
+# Create the database subnet
+resource "azurerm_subnet" "dbsubnet" {
+  name                 = var.dbsubnet_name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  resource_group_name  = azurerm_resource_group.rg.name
+  address_prefixes     = var.dbsubnet_cidr
+}
+
